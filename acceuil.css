@@ -89,7 +89,7 @@ h3 { margin: 0 0 10px; font-size: clamp(28px, 3.5vw, 47px); line-height: .9; let
 .contact-button span { font-size: 20px; }
 .contact-email { display: block; margin-top: 18px; font: 11px var(--mono); text-decoration: underline; text-underline-offset: 5px; }
 .founder-section { display: grid; grid-template-columns: .8fr 1.2fr; gap: 8vw; align-items: center; padding: 100px 9vw; background: var(--blue); color: var(--night); }
-.founder-portrait { min-height: 390px; background: linear-gradient(145deg, rgba(19, 22, 23, .08), rgba(19, 22, 23, .55)), url("https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=800&q=85") center/cover; filter: saturate(.7); }
+.founder-portrait { min-height: 390px; background: linear-gradient(145deg, rgba(19, 22, 23, .08), rgba(19, 22, 23, .55)), url("images/photo de profil antho.png") center/cover; filter: saturate(.7); }
 .founder-copy .label { color: var(--night); }
 .founder-copy h2 { margin-bottom: 25px; }
 .founder-copy h2 i { color: var(--orange); }
