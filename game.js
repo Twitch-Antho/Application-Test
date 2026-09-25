@@ -91,26 +91,53 @@
   function hitLaser(l) {
     return player.x + player.w / 2 > l.x - l.w / 2 && player.x - player.w / 2 < l.x + l.w / 2 && player.y + player.h / 2 > l.y - l.h / 2 && player.y - player.h / 2 < l.y + l.h / 2;
   }
+
+  function showOverlay(title, text, buttonText = 'LANCER LA PARTIE <span>→</span>') {
+    if (overlay) {
+      overlay.hidden = false;
+      overlay.style.display = 'flex';
+      overlay.style.pointerEvents = 'auto';
+    }
+    if (overlayTitle) overlayTitle.textContent = title;
+    if (overlayText) overlayText.innerHTML = text;
+    if (startBtn) {
+      startBtn.disabled = false;
+      startBtn.style.pointerEvents = 'auto';
+      startBtn.style.opacity = '1';
+      startBtn.innerHTML = buttonText;
+    }
+  }
+
+  function hideOverlay() {
+    if (overlay) {
+      overlay.hidden = true;
+      overlay.style.display = 'none';
+      overlay.style.pointerEvents = 'none';
+    }
+    if (startBtn) {
+      startBtn.disabled = true;
+      startBtn.style.pointerEvents = 'none';
+      startBtn.style.opacity = '0';
+    }
+  }
+
   function gameOver() {
     running = false; setStatus('GAME OVER', false);
     if (score > best) { best = score; localStorage.setItem('neonDodgeBest', best); }
     updateHud();
-    if (overlay) overlay.hidden = false;
-    if (overlayTitle) overlayTitle.textContent = 'PARTIE TERMINÉE';
-    if (overlayText) overlayText.innerHTML = `Score : <b>${score}</b><br>Atteins le niveau ${level + 1} pour aller plus loin.`;
-    if (startBtn) startBtn.innerHTML = 'REJOUER <span>→</span>';
+    showOverlay('PARTIE TERMINÉE', `Score : <b>${score}</b><br>Atteins le niveau ${level + 1} pour aller plus loin.`, 'REJOUER <span>→</span>');
     burst(player.x, player.y);
   }
   function start() {
     reset(); running = true; setStatus('EN JEU', true);
-    if (overlay) overlay.hidden = true;
+    hideOverlay();
     lastTime = performance.now(); requestAnimationFrame(loop);
   }
   if (startBtn) startBtn.addEventListener('click', start);
 
   function movePlayer(dt) {
     let dx = (keys.right ? 1 : 0) - (keys.left ? 1 : 0);
-    let dy = (keys.down ? 1 : 0) - (keys.up ? 1 : 0);
+    let dy = (keys.down ? 1 : 0) - (keys.up ? 1 : 1);
     player.x = Math.max(13, Math.min(width - 13, player.x + dx * player.speed * dt));
     player.y = Math.max(18, Math.min(height - 18, player.y + dy * player.speed * dt));
   }
@@ -139,7 +166,6 @@
     if (newLevel !== level) { level = newLevel; updateHud(); burst(player.x, player.y, '#52f7ff'); }
     score = Math.floor(elapsed * (difficulty === 'easy' ? .7 : difficulty === 'hard' ? 1.8 : 1));
     meteorTimer -= dt;
-    // Levels 1–2: only small meteors. Levels 3–4: large asteroids only.
     const interval = level < 3 ? .72 : Math.max(.38, .92 - level * .045);
     if (meteorTimer <= 0) { spawnMeteor(); if (level >= 4 && Math.random() < .28) spawnMeteor(); meteorTimer = interval; }
     laserTimer -= dt;
@@ -161,10 +187,11 @@
     for (let x = 0; x < width; x += 32) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, height); ctx.stroke(); }
     for (let y = 0; y < height; y += 32) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(width, y); ctx.stroke(); }
     lasers.forEach(l => { ctx.shadowBlur = 16; ctx.shadowColor = '#ff3d81'; ctx.fillStyle = '#ff3d81'; ctx.fillRect(l.x - l.w / 2, l.y - l.h / 2, l.w, l.h); ctx.shadowBlur = 0; });
-    meteors.forEach(m => { ctx.save(); ctx.translate(m.x, m.y); ctx.rotate(m.angle); ctx.shadowBlur = 12; ctx.shadowColor = '#ff3d81'; ctx.fillStyle = m.r > 15 ? '#bd245e' : '#ff3d81'; ctx.beginPath(); for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4, r = m.r * (.78 + Math.random() * .22); ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r); } ctx.closePath(); ctx.fill(); ctx.restore(); });
-    ctx.save(); ctx.translate(player.x, player.y); ctx.shadowBlur = 18; ctx.shadowColor = '#52f7ff'; ctx.fillStyle = '#52f7ff'; ctx.beginPath(); ctx.moveTo(0, -16); ctx.lineTo(12, 13); ctx.lineTo(0, 8); ctx.lineTo(-12, 13); ctx.closePath(); ctx.fill(); ctx.restore();
+    meteors.forEach(m => { ctx.save(); ctx.translate(m.x, m.y); ctx.rotate(m.angle); ctx.shadowBlur = 12; ctx.shadowColor = '#ff3d81'; ctx.fillStyle = m.r > 15 ? '#bd245e' : '#ff3d81'; ctx.beginPath(); ctx.moveTo(0, -m.r); ctx.lineTo(m.r * .8, 0); ctx.lineTo(0, m.r); ctx.lineTo(-m.r * .8, 0); ctx.closePath(); ctx.fill(); ctx.restore(); });
+    ctx.save(); ctx.translate(player.x, player.y); ctx.shadowBlur = 18; ctx.shadowColor = '#52f7ff'; ctx.fillStyle = '#52f7ff'; ctx.beginPath(); ctx.moveTo(0, -16); ctx.lineTo(12, 13); ctx.lineTo(0, 7); ctx.lineTo(-12, 13); ctx.closePath(); ctx.fill(); ctx.restore();
     particles.forEach(p => { ctx.globalAlpha = Math.max(0, p.life * 2); ctx.fillStyle = p.color; ctx.fillRect(p.x, p.y, 3, 3); }); ctx.globalAlpha = 1;
   }
   function loop(now) { if (!running) { draw(); return; } const dt = Math.min((now - lastTime) / 1000, .05); lastTime = now; update(dt); draw(); if (running) requestAnimationFrame(loop); }
+  showOverlay('PRÊT À JOUER ?', 'Évite les météores rouges.<br>Chaque niveau rapporte des points.', 'LANCER LA PARTIE <span>→</span>');
   setDifficulty('normal'); updateHud(); draw();
 })();
