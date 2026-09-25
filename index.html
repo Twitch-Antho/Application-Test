@@ -1,36 +1,16 @@
 <!doctype html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#090d1f" />
-  <title>Neon Dodge — Le jeu</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css" />
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><meta name="theme-color" content="#090d1f"><title>Neon Dodge — Arcade</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <main class="shell">
-    <header class="topbar">
-      <div class="brand"><span class="brand-mark">✦</span><span>NEON DODGE</span></div>
-      <div class="top-actions"><div class="best-score">MEILLEUR <strong id="bestScore">0</strong></div><div class="points">✦ <strong id="points">0</strong> PTS</div></div>
-    </header>
-    <section class="hero">
-      <div class="intro">
-        <p class="eyebrow">ARCADE // SURVIE</p><h1>Évite.<br /><span>Survis.</span></h1>
-        <p class="tagline">Traverse la pluie de météores et bats ton record dans une arène néon sans fin.</p>
-        <div class="controls-hint"><span class="key">←</span><span class="key">→</span><span>ou glisse ton doigt pour te déplacer</span></div>
-        <div class="difficulty-panel"><div class="panel-heading"><span>DIFFICULTÉ</span><small id="rewardText">Récompense : +1 pt / niveau</small></div><div class="difficulty-options"><button class="difficulty" data-difficulty="easy"><b>FACILE</b><small>+0,5 pt / niveau</small></button><button class="difficulty active" data-difficulty="normal"><b>NORMAL</b><small>+1 pt / niveau</small></button><button class="difficulty" data-difficulty="hard"><b>DIFFICILE</b><small>+2 pts / niveau</small></button></div></div>
-      </div>
-      <div class="game-card">
-        <div class="hud"><div><small>SCORE</small><b id="score">0</b></div><div class="level"><small>NIVEAU</small><b id="level">1</b></div><div class="status"><span id="statusDot"></span><small id="statusText">PRÊT</small></div></div>
-        <div class="canvas-wrap"><canvas id="game" aria-label="Zone de jeu Neon Dodge"></canvas><div class="overlay" id="overlay"><div class="overlay-icon">✦</div><h2 id="overlayTitle">PRÊT À JOUER ?</h2><p id="overlayText">Évite les météores rouges.<br />Chaque niveau rapporte des points.</p><button id="startBtn">LANCER LA PARTIE <span>→</span></button></div></div>
-        <div class="game-footer"><span><i class="dot player-dot"></i>TOI</span><span><i class="dot danger-dot"></i>DANGER</span><span class="mobile-tip">TOUCHE L'ÉCRAN POUR JOUER</span></div>
-      </div>
-    </section>
-    <section class="shop"><div><p class="eyebrow">GARAGE // BIENTÔT</p><h2>MAGASIN <span>EN CONSTRUCTION</span></h2><p>Gagne des points en montant de niveau. De nouveaux vaisseaux et bonus arriveront bientôt.</p></div><div class="shop-items"><article><div class="item-icon">◇</div><b>VAISSEAU PHANTOM</b><small>??? pts · bientôt</small></article><article><div class="item-icon pink">✦</div><b>BOUCLIER NÉON</b><small>??? pts · bientôt</small></article><article><div class="item-icon purple">◈</div><b>TRAIL COSMIQUE</b><small>??? pts · bientôt</small></article></div></section>
-    <footer><span>NEON DODGE <b>v1.1</b></span><span>Un mini-jeu fait avec HTML, CSS &amp; JavaScript</span></footer>
-  </main><script src="game.js"></script>
-</body>
-</html>
+<main class="shell">
+<header class="topbar"><a class="brand" href="#play"><span class="brand-mark">✦</span>NEON DODGE</a><nav><a class="nav-link active" href="#play">JOUER</a><a class="nav-link" href="#shop">BOUTIQUE <em>Bientôt</em></a><a class="nav-link" href="#ranking">CLASSEMENT</a></nav><div class="wallet">✦ <strong id="points">0</strong> PTS</div></header>
+<section class="hero" id="play"><div class="intro"><p class="eyebrow">ARCADE // SURVIE</p><h1>Évite.<br><span>Survis.</span></h1><p class="tagline">Traverse la pluie de météores, monte de niveau et deviens le pilote le plus rapide de la galaxie.</p><div class="controls-hint"><span class="key">←</span><span class="key">→</span><span>ou glisse ton doigt pour te déplacer</span></div><div class="difficulty-panel"><div class="panel-heading"><span>CHOISIR LA DIFFICULTÉ</span><small id="rewardText">+1 pt / niveau</small></div><div class="difficulty-options"><button class="difficulty" data-difficulty="easy"><b>FACILE</b><small>+0,5 pt · calme</small></button><button class="difficulty active" data-difficulty="normal"><b>NORMAL</b><small>+1 pt · équilibré</small></button><button class="difficulty" data-difficulty="hard"><b>DIFFICILE</b><small>+2 pts · intense</small></button></div></div></div>
+<div class="game-card"><div class="hud"><div><small>SCORE</small><b id="score">0</b></div><div><small>NIVEAU</small><b id="level" class="white">1</b></div><div class="status"><span id="statusDot"></span><small id="statusText">PRÊT</small></div></div><div class="canvas-wrap"><canvas id="game" aria-label="Zone de jeu Neon Dodge"></canvas><div class="overlay" id="overlay"><div class="overlay-icon">✦</div><h2 id="overlayTitle">PRÊT À JOUER ?</h2><p id="overlayText">Évite les météores rouges.<br>Chaque niveau rapporte des points.</p><button id="startBtn">LANCER LA PARTIE <span>→</span></button></div></div><div class="game-footer"><span><i class="dot player-dot"></i>TOI</span><span><i class="dot danger-dot"></i>DANGER</span><span class="mobile-tip">TOUCHE L'ÉCRAN POUR JOUER</span></div></div></section>
+<section class="shop" id="shop"><div class="section-title"><p class="eyebrow">GARAGE // BIENTÔT</p><h2>La boutique arrive.</h2><p>Prépare tes points : les premiers équipements sont en préparation.</p></div><div class="shop-grid"><article class="shop-item"><div class="item-icon">◇</div><b>PHANTOM</b><small>Vaisseau furtif</small><span>BIENTÔT</span></article><article class="shop-item"><div class="item-icon pink">✦</div><b>NEON CORE</b><small>Énergie premium</small><span>BIENTÔT</span></article><article class="shop-item"><div class="item-icon purple">◈</div><b>VOID TRAIL</b><small>Trace cosmique</small><span>BIENTÔT</span></article><article class="shop-item locked"><div class="item-icon gold">?</div><b>SECRET SLOT</b><small>Une surprise arrive</small><span>VERROUILLÉ</span></article></div></section>
+<section class="ranking" id="ranking"><div><p class="eyebrow">PILOTES // LOCAL</p><h2>Ton classement</h2></div><div class="rank-card"><span class="rank-number">#1</span><span>TOI, PILOTE NÉON</span><strong id="bestScore">0</strong><small>MEILLEUR SCORE</small></div></section>
+<footer><span>NEON DODGE <b>v1.2</b></span><span>Un mini-jeu fait avec HTML, CSS &amp; JavaScript</span></footer>
+</main><script src="game.js"></script>
+</body></html>
