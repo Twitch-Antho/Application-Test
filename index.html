@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#090d1f" />
+  <title>Neon Dodge — Le jeu</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div class="brand"><span class="brand-mark">✦</span><span>NEON DODGE</span></div>
+      <div class="best-score">MEILLEUR <strong id="bestScore">0</strong></div>
+    </header>
+
+    <section class="hero">
+      <div class="intro">
+        <p class="eyebrow">ARCADE // SURVIE</p>
+        <h1>Évite.<br /><span>Survis.</span></h1>
+        <p class="tagline">Traverse la pluie de météores et bats ton record dans une arène néon sans fin.</p>
+        <div class="controls-hint"><span class="key">←</span><span class="key">→</span><span>ou glisse ton doigt pour te déplacer</span></div>
+      </div>
+
+      <div class="game-card">
+        <div class="hud"><div><small>SCORE</small><b id="score">0</b></div><div class="level"><small>NIVEAU</small><b id="level">1</b></div><div class="status"><span id="statusDot"></span><small id="statusText">PRÊT</small></div></div>
+        <div class="canvas-wrap"><canvas id="game" aria-label="Zone de jeu Neon Dodge"></canvas><div class="overlay" id="overlay"><div class="overlay-icon">✦</div><h2 id="overlayTitle">PRÊT À JOUER ?</h2><p id="overlayText">Évite les météores rouges.<br />Chaque seconde compte.</p><button id="startBtn">LANCER LA PARTIE <span>→</span></button></div></div>
+        <div class="game-footer"><span><i class="dot player-dot"></i>TOI</span><span><i class="dot danger-dot"></i>DANGER</span><span class="mobile-tip">TOUCHE L'ÉCRAN POUR JOUER</span></div>
+      </div>
+    </section>
+    <footer><span>NEON DODGE <b>v1.0</b></span><span>Un mini-jeu fait avec HTML, CSS &amp; JavaScript</span></footer>
+  </main>
+  <script src="game.js"></script>
+</body>
+</html>
