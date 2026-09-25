@@ -1,1 +1,170 @@
-const canvas=document.getElementById('game'),ctx=canvas.getContext('2d'),scoreEl=document.getElementById('score'),levelEl=document.getElementById('level'),bestEl=document.getElementById('bestScore'),pointsEl=document.getElementById('points'),overlay=document.getElementById('overlay'),title=document.getElementById('overlayTitle'),text=document.getElementById('overlayText'),button=document.getElementById('startBtn'),statusText=document.getElementById('statusText'),rewardText=document.getElementById('rewardText');const W=700,H=500;let running=false,score=0,level=1,last=0,spawn=0,raf=0,earned=0;let player={x:350,y:440,speed:390},rocks=[],keys={left:false,right:false};let best=Number(localStorage.getItem('neon-best')||0),points=Number(localStorage.getItem('neon-points')||0),difficulty='normal';const settings={easy:{reward:.5,spawn:.88,speed:.78},normal:{reward:1,spawn:.68,speed:1},hard:{reward:2,spawn:.43,speed:1.3}};bestEl.textContent=best;pointsEl.textContent=points;document.querySelectorAll('.difficulty').forEach(b=>b.addEventListener('click',()=>{if(running)return;difficulty=b.dataset.difficulty;document.querySelectorAll('.difficulty').forEach(x=>x.classList.remove('active'));b.classList.add('active');rewardText.textContent=`+${settings[difficulty].reward} pt / niveau`}));function resize(){const d=devicePixelRatio||1;canvas.width=W*d;canvas.height=H*d;ctx.setTransform(d,0,0,d,0,0)}resize();addEventListener('resize',resize);function reset(){score=0;level=1;earned=0;rocks=[];player.x=W/2;scoreEl.textContent=0;levelEl.textContent=1}function start(){reset();running=true;overlay.classList.add('hidden');statusText.textContent='EN JEU';last=performance.now();raf=requestAnimationFrame(loop)}function end(){running=false;cancelAnimationFrame(raf);if(Math.floor(score)>best){best=Math.floor(score);localStorage.setItem('neon-best',best);bestEl.textContent=best}title.textContent='PARTIE TERMINÉE';text.innerHTML=`Score final : <strong style="color:#55f5df">${Math.floor(score)}</strong><br>Tu as gagné ${earned} point${earned>1?'s':''}.`;button.innerHTML='REJOUER <span>→</span>';overlay.classList.remove('hidden');statusText.textContent='PERDU'}function meteor(){const s=settings[difficulty],size=12+Math.random()*18;rocks.push({x:size+Math.random()*(W-size*2),y:-size,size,vy:(125+level*17+Math.random()*80)*s.speed,rot:Math.random()*7})}function update(dt){const s=settings[difficulty];if(keys.left)player.x-=player.speed*dt;if(keys.right)player.x+=player.speed*dt;player.x=Math.max(22,Math.min(W-22,player.x));spawn-=dt;if(spawn<=0){meteor();spawn=Math.max(.18,s.spawn-level*.035)}rocks.forEach(r=>{r.y+=r.vy*dt;r.rot+=dt*2});rocks=rocks.filter(r=>r.y<H+40);for(const r of rocks)if(Math.abs(r.x-player.x)<r.size+14&&Math.abs(r.y-player.y)<r.size+12){end();return}score+=dt*10;const next=Math.floor(score/100)+1;if(next!==level){level=next;levelEl.textContent=level;points+=s.reward;earned+=s.reward;pointsEl.textContent=points;localStorage.setItem('neon-points',points)}scoreEl.textContent=Math.floor(score)}function draw(){ctx.clearRect(0,0,W,H);ctx.fillStyle='#080d22';ctx.fillRect(0,0,W,H);ctx.strokeStyle='#152047';for(let x=0;x<W;x+=50){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke()}for(let y=0;y<H;y+=50){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}for(let i=0;i<35;i++){const x=i*137%W,y=(i*79+score*2)%H;ctx.fillStyle=i%3?'#43517a':'#55f5df';ctx.globalAlpha=.45;ctx.fillRect(x,y,2,2)}ctx.globalAlpha=1;rocks.forEach(r=>{ctx.save();ctx.translate(r.x,r.y);ctx.rotate(r.rot);ctx.shadowBlur=18;ctx.shadowColor='#ff4d8d';ctx.fillStyle='#ff4d8d';ctx.beginPath();for(let i=0;i<7;i++){const a=i*Math.PI*2/7,rad=i%2?r.size*.65:r.size;ctx.lineTo(Math.cos(a)*rad,Math.sin(a)*rad)}ctx.closePath();ctx.fill();ctx.restore()});ctx.save();ctx.translate(player.x,player.y);ctx.shadowBlur=20;ctx.shadowColor='#55f5df';ctx.fillStyle='#55f5df';ctx.beginPath();ctx.moveTo(0,-17);ctx.lineTo(16,13);ctx.lineTo(0,8);ctx.lineTo(-16,13);ctx.closePath();ctx.fill();ctx.fillStyle='#101832';ctx.beginPath();ctx.arc(0,0,4,0,Math.PI*2);ctx.fill();ctx.restore()}function loop(now){if(!running)return;const dt=Math.min((now-last)/1000,.05);last=now;update(dt);draw();if(running)raf=requestAnimationFrame(loop)}addEventListener('keydown',e=>{if(e.key==='ArrowLeft'||e.key.toLowerCase()==='a')keys.left=true;if(e.key==='ArrowRight'||e.key.toLowerCase()==='d')keys.right=true;if(e.key===' '&&!running)start()});addEventListener('keyup',e=>{if(e.key==='ArrowLeft'||e.key.toLowerCase()==='a')keys.left=false;if(e.key==='ArrowRight'||e.key.toLowerCase()==='d')keys.right=false});canvas.addEventListener('pointermove',e=>{if(running){const r=canvas.getBoundingClientRect();player.x=(e.clientX-r.left)/r.width*W}});canvas.addEventListener('pointerdown',e=>{if(running){const r=canvas.getBoundingClientRect();player.x=(e.clientX-r.left)/r.width*W}});button.addEventListener('click',start);draw();
+(() => {
+  const canvas = document.getElementById('game');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const scoreEl = document.getElementById('score');
+  const levelEl = document.getElementById('level');
+  const bestEl = document.getElementById('bestScore');
+  const overlay = document.getElementById('overlay');
+  const overlayTitle = document.getElementById('overlayTitle');
+  const overlayText = document.getElementById('overlayText');
+  const startBtn = document.getElementById('startBtn');
+  const statusText = document.getElementById('statusText');
+  const statusDot = document.getElementById('statusDot');
+  const difficultyButtons = document.querySelectorAll('.difficulty');
+  const rewardText = document.getElementById('rewardText');
+
+  let width = 0, height = 0, running = false, lastTime = 0;
+  let score = 0, level = 1, elapsed = 0, meteorTimer = 0, laserTimer = 0;
+  let difficulty = 'normal';
+  let meteors = [], lasers = [], particles = [];
+  let best = Number(localStorage.getItem('neonDodgeBest') || 0);
+  const keys = { left: false, right: false, up: false, down: false };
+  const player = { x: 0, y: 0, w: 18, h: 26, speed: 330 };
+
+  function resize() {
+    const rect = canvas.getBoundingClientRect();
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    width = Math.max(280, rect.width);
+    height = Math.max(260, rect.height);
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    player.x = Math.min(Math.max(player.x || width / 2, 16), width - 16);
+    player.y = Math.min(Math.max(player.y || height - 42, 20), height - 20);
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  function setStatus(text, active) {
+    if (statusText) statusText.textContent = text;
+    if (statusDot) statusDot.classList.toggle('active', !!active);
+  }
+  function updateHud() {
+    if (scoreEl) scoreEl.textContent = String(score);
+    if (levelEl) levelEl.textContent = String(level);
+    if (bestEl) bestEl.textContent = String(best);
+  }
+  function setDifficulty(value) {
+    difficulty = value;
+    difficultyButtons.forEach(btn => btn.classList.toggle('active', btn.dataset.difficulty === value));
+    if (rewardText) rewardText.textContent = `Récompense : +${value === 'easy' ? '0,5' : value === 'hard' ? '2' : '1'} pt / niveau`;
+  }
+  difficultyButtons.forEach(btn => btn.addEventListener('click', () => setDifficulty(btn.dataset.difficulty)));
+
+  function reset() {
+    score = 0; level = 1; elapsed = 0; meteorTimer = 0; laserTimer = 0;
+    meteors = []; lasers = []; particles = [];
+    player.x = width / 2; player.y = height - 42;
+    updateHud();
+  }
+  function spawnMeteor() {
+    const large = level >= 3;
+    const radius = large ? 20 + Math.random() * 10 : 7 + Math.random() * 5;
+    meteors.push({
+      x: radius + Math.random() * (width - radius * 2), y: -radius,
+      r: radius, speed: (large ? 90 : 125) + Math.random() * (large ? 70 : 75) + level * 7,
+      drift: (Math.random() - .5) * (large ? 35 : 20), angle: Math.random() * 6.28,
+      spin: (Math.random() - .5) * 2
+    });
+  }
+  function spawnLaser() {
+    if (level < 5) return;
+    const side = Math.floor(Math.random() * 4);
+    const thickness = 3;
+    const speed = 210 + level * 10;
+    let laser;
+    if (side === 0) laser = { x: Math.random() * width, y: -10, vx: 0, vy: speed, w: thickness, h: 34 };
+    if (side === 1) laser = { x: Math.random() * width, y: height + 10, vx: 0, vy: -speed, w: thickness, h: 34 };
+    if (side === 2) laser = { x: -10, y: Math.random() * height, vx: speed, vy: 0, w: 34, h: thickness };
+    if (side === 3) laser = { x: width + 10, y: Math.random() * height, vx: -speed, vy: 0, w: 34, h: thickness };
+    lasers.push(laser);
+  }
+  function burst(x, y, color = '#ff3d81') {
+    for (let i = 0; i < 12; i++) particles.push({ x, y, vx: (Math.random() - .5) * 150, vy: (Math.random() - .5) * 150, life: .45, color });
+  }
+  function hitCircle(x, y, r) {
+    const dx = Math.max(Math.abs(x - player.x) - player.w / 2, 0);
+    const dy = Math.max(Math.abs(y - player.y) - player.h / 2, 0);
+    return dx * dx + dy * dy < r * r;
+  }
+  function hitLaser(l) {
+    return player.x + player.w / 2 > l.x - l.w / 2 && player.x - player.w / 2 < l.x + l.w / 2 && player.y + player.h / 2 > l.y - l.h / 2 && player.y - player.h / 2 < l.y + l.h / 2;
+  }
+  function gameOver() {
+    running = false; setStatus('GAME OVER', false);
+    if (score > best) { best = score; localStorage.setItem('neonDodgeBest', best); }
+    updateHud();
+    if (overlay) overlay.hidden = false;
+    if (overlayTitle) overlayTitle.textContent = 'PARTIE TERMINÉE';
+    if (overlayText) overlayText.innerHTML = `Score : <b>${score}</b><br>Atteins le niveau ${level + 1} pour aller plus loin.`;
+    if (startBtn) startBtn.innerHTML = 'REJOUER <span>→</span>';
+    burst(player.x, player.y);
+  }
+  function start() {
+    reset(); running = true; setStatus('EN JEU', true);
+    if (overlay) overlay.hidden = true;
+    lastTime = performance.now(); requestAnimationFrame(loop);
+  }
+  if (startBtn) startBtn.addEventListener('click', start);
+
+  function movePlayer(dt) {
+    let dx = (keys.right ? 1 : 0) - (keys.left ? 1 : 0);
+    let dy = (keys.down ? 1 : 0) - (keys.up ? 1 : 0);
+    player.x = Math.max(13, Math.min(width - 13, player.x + dx * player.speed * dt));
+    player.y = Math.max(18, Math.min(height - 18, player.y + dy * player.speed * dt));
+  }
+  window.addEventListener('keydown', e => {
+    if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'a', 'd', 'w', 's'].includes(e.key)) e.preventDefault();
+    if (e.key === 'ArrowLeft' || e.key === 'a') keys.left = true;
+    if (e.key === 'ArrowRight' || e.key === 'd') keys.right = true;
+    if (e.key === 'ArrowUp' || e.key === 'w') keys.up = true;
+    if (e.key === 'ArrowDown' || e.key === 's') keys.down = true;
+    if (e.key === ' ' && !running) start();
+  });
+  window.addEventListener('keyup', e => {
+    if (e.key === 'ArrowLeft' || e.key === 'a') keys.left = false;
+    if (e.key === 'ArrowRight' || e.key === 'd') keys.right = false;
+    if (e.key === 'ArrowUp' || e.key === 'w') keys.up = false;
+    if (e.key === 'ArrowDown' || e.key === 's') keys.down = false;
+  });
+  let touchX = null, touchY = null;
+  canvas.addEventListener('pointerdown', e => { touchX = e.clientX; touchY = e.clientY; canvas.setPointerCapture(e.pointerId); });
+  canvas.addEventListener('pointermove', e => { if (touchX === null) return; const r = canvas.getBoundingClientRect(); player.x = Math.max(13, Math.min(width - 13, e.clientX - r.left)); player.y = Math.max(18, Math.min(height - 18, e.clientY - r.top)); });
+  canvas.addEventListener('pointerup', () => { touchX = touchY = null; });
+
+  function update(dt) {
+    elapsed += dt;
+    const newLevel = Math.floor(elapsed / 10) + 1;
+    if (newLevel !== level) { level = newLevel; updateHud(); burst(player.x, player.y, '#52f7ff'); }
+    score = Math.floor(elapsed * (difficulty === 'easy' ? .7 : difficulty === 'hard' ? 1.8 : 1));
+    meteorTimer -= dt;
+    // Levels 1–2: only small meteors. Levels 3–4: large asteroids only.
+    const interval = level < 3 ? .72 : Math.max(.38, .92 - level * .045);
+    if (meteorTimer <= 0) { spawnMeteor(); if (level >= 4 && Math.random() < .28) spawnMeteor(); meteorTimer = interval; }
+    laserTimer -= dt;
+    if (level >= 5 && laserTimer <= 0) { spawnLaser(); laserTimer = Math.max(.42, 1.15 - level * .035); }
+    movePlayer(dt);
+    meteors.forEach(m => { m.y += m.speed * dt; m.x += m.drift * dt; m.angle += m.spin * dt; });
+    lasers.forEach(l => { l.x += l.vx * dt; l.y += l.vy * dt; });
+    meteors = meteors.filter(m => m.y < height + m.r + 10 && m.x > -m.r - 20 && m.x < width + m.r + 20);
+    lasers = lasers.filter(l => l.x > -60 && l.x < width + 60 && l.y > -60 && l.y < height + 60);
+    particles.forEach(p => { p.x += p.vx * dt; p.y += p.vy * dt; p.life -= dt; }); particles = particles.filter(p => p.life > 0);
+    for (const m of meteors) if (hitCircle(m.x, m.y, m.r * .78)) return gameOver();
+    for (const l of lasers) if (hitLaser(l)) return gameOver();
+    updateHud();
+  }
+  function draw() {
+    ctx.clearRect(0, 0, width, height);
+    ctx.fillStyle = '#090d1f'; ctx.fillRect(0, 0, width, height);
+    ctx.strokeStyle = 'rgba(82,247,255,.055)'; ctx.lineWidth = 1;
+    for (let x = 0; x < width; x += 32) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, height); ctx.stroke(); }
+    for (let y = 0; y < height; y += 32) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(width, y); ctx.stroke(); }
+    lasers.forEach(l => { ctx.shadowBlur = 16; ctx.shadowColor = '#ff3d81'; ctx.fillStyle = '#ff3d81'; ctx.fillRect(l.x - l.w / 2, l.y - l.h / 2, l.w, l.h); ctx.shadowBlur = 0; });
+    meteors.forEach(m => { ctx.save(); ctx.translate(m.x, m.y); ctx.rotate(m.angle); ctx.shadowBlur = 12; ctx.shadowColor = '#ff3d81'; ctx.fillStyle = m.r > 15 ? '#bd245e' : '#ff3d81'; ctx.beginPath(); for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4, r = m.r * (.78 + Math.random() * .22); ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r); } ctx.closePath(); ctx.fill(); ctx.restore(); });
+    ctx.save(); ctx.translate(player.x, player.y); ctx.shadowBlur = 18; ctx.shadowColor = '#52f7ff'; ctx.fillStyle = '#52f7ff'; ctx.beginPath(); ctx.moveTo(0, -16); ctx.lineTo(12, 13); ctx.lineTo(0, 8); ctx.lineTo(-12, 13); ctx.closePath(); ctx.fill(); ctx.restore();
+    particles.forEach(p => { ctx.globalAlpha = Math.max(0, p.life * 2); ctx.fillStyle = p.color; ctx.fillRect(p.x, p.y, 3, 3); }); ctx.globalAlpha = 1;
+  }
+  function loop(now) { if (!running) { draw(); return; } const dt = Math.min((now - lastTime) / 1000, .05); lastTime = now; update(dt); draw(); if (running) requestAnimationFrame(loop); }
+  setDifficulty('normal'); updateHud(); draw();
+})();
